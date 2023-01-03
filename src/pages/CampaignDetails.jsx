@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useStateContext } from '../context'
-import { CustomButton, CountBox } from '../components'
+import { CustomButton, CountBox, Loader } from '../components'
 import { calculateBarPercentage, daysLeft } from '../utils'
 import { thirdweb } from '../assets'
 
@@ -10,7 +10,7 @@ import { thirdweb } from '../assets'
 const CampaignDetails = () => {
 
   const { state } = useLocation()
-
+  const navigate = useNavigate()
   const { getDonations, contract, address, donate, getCampaigns } = useStateContext()
 
   const [isLoading, setIsLoading] = useState()
@@ -18,15 +18,15 @@ const CampaignDetails = () => {
   const [donators, setDonators] = useState([])
   const [userCampaigns, setUserCampaigns] = useState([])
 
-  const remainingDays = daysLeft(state.deadline)
+  const remainingDays = daysLeft(state?.deadline)
 
   useEffect(()=>{
     const fetchDonators = async () => {
-      const response = await getDonations(state.pId)
+      const response = await getDonations(state?.pId)
 
       const allCampaigns = await getCampaigns()
 
-      const usercampaigns = allCampaigns.filter( campaign => campaign.owner === state.owner )
+      const usercampaigns = allCampaigns.filter( campaign => campaign.owner === state?.owner )
 
       setUserCampaigns(usercampaigns)
 
@@ -42,23 +42,26 @@ const CampaignDetails = () => {
     await donate(state.pId, amount)
 
     setIsLoading(false)
+
+    navigate('/')
+
   }
 
   return (
     <div>
-      {isLoading && 'Loading...'}
+      {isLoading && <Loader />}
       <div className='w-full flex md:flex-row flex-col mt-10 gap-[30px] '>
         <div className='flex-1 flex-col'>
-          <img src={state.image} alt='campaign' className='w-full h-[410px] object-cover rounded-xl ' />
+          <img src={state?.image} alt='campaign' className='w-full h-[410px] object-cover rounded-xl ' />
           <div className='relative w-full h-[5px] bg-[#3a3a43] mt-2 ' >
-              <div className='absolute h-full bg-[#4acd8d] ' style={{width:`${calculateBarPercentage(state.target, state.amountCollected)}%`, maxWidth: '100%'}} >
+              <div className='absolute h-full bg-[#4acd8d] ' style={{width:`${calculateBarPercentage(state?.target, state?.amountCollected)}%`, maxWidth: '100%'}} >
 
               </div>
           </div>
         </div>
         <div className='flex md:w-[150px] w-full flex-wrap justify-center gap-[30px] '>
           <CountBox title='Days Left' value={remainingDays} />
-          <CountBox title={`Raised of ${state.target}`} value={state.amountCollected} />
+          <CountBox title={`Raised of ${state?.target}`} value={state?.amountCollected} />
           <CountBox title="Total Backers" value={donators?.length} />
         </div>
       </div>
@@ -72,7 +75,7 @@ const CampaignDetails = () => {
                 <img src={thirdweb} alt='user' className='w-[60%] h-[60%] object-contain ' />
               </div>
               <div>
-                <h4 className='font-epilogue font-semibold text-[14px] text-white  break-all'>{state.owner}</h4>
+                <h4 className='font-epilogue font-semibold text-[14px] text-white  break-all'>{state?.owner}</h4>
                 <p className='mt-[4px] font-epilogue font-normal text-[12px] text-[#808191] '>
                   {userCampaigns.length} {userCampaigns.length > 1 || userCampaigns.length === 0 ? 'Campaigns' : 'Campaign'}
                 </p>
@@ -83,7 +86,7 @@ const CampaignDetails = () => {
             <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase ">story</h4>
 
              <div className='mt-[20px]'>
-               <p className='font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify'>{state.description}</p>
+               <p className='font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify'>{state?.description}</p>
              </div>
           </div>
           <div>
